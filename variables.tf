@@ -38,12 +38,12 @@ EOT
     administrator_login_password                 = optional(string)
     administrator_login_password_wo              = optional(string)
     administrator_login_password_wo_version      = optional(number)
-    connection_policy                            = optional(string, "Default")
-    express_vulnerability_assessment_enabled     = optional(bool, false)
-    minimum_tls_version                          = optional(string, "1.2")
-    outbound_network_restriction_enabled         = optional(bool, false)
+    connection_policy                            = optional(string) # Default: "Default"
+    express_vulnerability_assessment_enabled     = optional(bool)   # Default: false
+    minimum_tls_version                          = optional(string) # Default: "1.2"
+    outbound_network_restriction_enabled         = optional(bool)   # Default: false
     primary_user_assigned_identity_id            = optional(string)
-    public_network_access_enabled                = optional(bool, true)
+    public_network_access_enabled                = optional(bool) # Default: true
     tags                                         = optional(map(string))
     transparent_data_encryption_key_vault_key_id = optional(string)
     azuread_administrator = optional(object({
