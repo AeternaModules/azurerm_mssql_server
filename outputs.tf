@@ -1,3 +1,7 @@
+output "mssql_servers_id" {
+  description = "Map of id values across all mssql_servers, keyed the same as var.mssql_servers"
+  value       = { for k, v in azurerm_mssql_server.mssql_servers : k => v.id }
+}
 output "mssql_servers_administrator_login" {
   description = "Map of administrator_login values across all mssql_servers, keyed the same as var.mssql_servers"
   value       = { for k, v in azurerm_mssql_server.mssql_servers : k => v.administrator_login }
