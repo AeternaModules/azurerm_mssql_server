@@ -1,3 +1,13 @@
+data "azurerm_key_vault_secret" "administrator_login_password" {
+  for_each     = { for k, v in var.mssql_servers : k => v if v.administrator_login_password_key_vault_id != null && v.administrator_login_password_key_vault_secret_name != null }
+  name         = each.value.administrator_login_password_key_vault_secret_name
+  key_vault_id = each.value.administrator_login_password_key_vault_id
+}
+data "azurerm_key_vault_secret" "administrator_login_password_wo" {
+  for_each     = { for k, v in var.mssql_servers : k => v if v.administrator_login_password_wo_key_vault_id != null && v.administrator_login_password_wo_key_vault_secret_name != null }
+  name         = each.value.administrator_login_password_wo_key_vault_secret_name
+  key_vault_id = each.value.administrator_login_password_wo_key_vault_id
+}
 resource "azurerm_mssql_server" "mssql_servers" {
   for_each = var.mssql_servers
 
@@ -6,8 +16,8 @@ resource "azurerm_mssql_server" "mssql_servers" {
   resource_group_name                          = each.value.resource_group_name
   version                                      = each.value.version
   administrator_login                          = each.value.administrator_login
-  administrator_login_password                 = each.value.administrator_login_password
-  administrator_login_password_wo              = each.value.administrator_login_password_wo
+  administrator_login_password                 = each.value.administrator_login_password != null ? each.value.administrator_login_password : try(data.azurerm_key_vault_secret.administrator_login_password[each.key].value, null)
+  administrator_login_password_wo              = each.value.administrator_login_password_wo != null ? each.value.administrator_login_password_wo : try(data.azurerm_key_vault_secret.administrator_login_password_wo[each.key].value, null)
   administrator_login_password_wo_version      = each.value.administrator_login_password_wo_version
   connection_policy                            = each.value.connection_policy
   express_vulnerability_assessment_enabled     = each.value.express_vulnerability_assessment_enabled
