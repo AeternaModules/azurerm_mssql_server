@@ -46,12 +46,12 @@ EOT
     administrator_login_password_wo_key_vault_id          = optional(string)
     administrator_login_password_wo_key_vault_secret_name = optional(string)
     administrator_login_password_wo_version               = optional(number)
-    connection_policy                                     = optional(string) # Default: "Default"
-    express_vulnerability_assessment_enabled              = optional(bool)   # Default: false
-    minimum_tls_version                                   = optional(string) # Default: "1.2"
-    outbound_network_restriction_enabled                  = optional(bool)   # Default: false
+    connection_policy                                     = optional(string)
+    express_vulnerability_assessment_enabled              = optional(bool)
+    minimum_tls_version                                   = optional(string)
+    outbound_network_restriction_enabled                  = optional(bool)
     primary_user_assigned_identity_id                     = optional(string)
-    public_network_access_enabled                         = optional(bool) # Default: true
+    public_network_access_enabled                         = optional(bool)
     tags                                                  = optional(map(string))
     transparent_data_encryption_key_vault_key_id          = optional(string)
     azuread_administrator = optional(object({
@@ -65,54 +65,6 @@ EOT
       type         = string
     }))
   }))
-  validation {
-    condition = alltrue([
-      for k, v in var.mssql_servers : (
-        contains(["2.0", "12.0"], v.version)
-      )
-    ])
-    error_message = "must be one of: 2.0, 12.0"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.mssql_servers : (
-        v.administrator_login == null || (length(v.administrator_login) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.mssql_servers : (
-        v.azuread_administrator == null || (length(v.azuread_administrator.login_username) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.mssql_servers : (
-        v.azuread_administrator == null || (can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", v.azuread_administrator.object_id)))
-      )
-    ])
-    error_message = "must be a valid UUID"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.mssql_servers : (
-        v.azuread_administrator == null || (v.azuread_administrator.tenant_id == null || (can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", v.azuread_administrator.tenant_id))))
-      )
-    ])
-    error_message = "must be a valid UUID"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.mssql_servers : (
-        v.minimum_tls_version == null || (contains(["1.2"], v.minimum_tls_version))
-      )
-    ])
-    error_message = "must be one of: 1.2"
-  }
   # --- Unconfirmed validation candidates, derived from azurerm_mssql_server's provider source ---
   # Not auto-enabled: either a bespoke provider validator we can't safely translate,
   # or a path that crosses a list-typed block (needs its own for_each wrapping).
@@ -135,6 +87,21 @@ EOT
   #   source:    [from resourcegroups.ValidateName: invalid when len(value) == 0]
   # path: resource_group_name
   #   source:    [from resourcegroups.ValidateName] !matched
+  # path: version
+  #   condition: contains(["2.0", "12.0"], value)
+  #   message:   must be one of: 2.0, 12.0
+  # path: administrator_login
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: azuread_administrator.login_username
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: azuread_administrator.object_id
+  #   condition: can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", value))
+  #   message:   must be a valid UUID
+  # path: azuread_administrator.tenant_id
+  #   condition: can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", value))
+  #   message:   must be a valid UUID
   # path: connection_policy
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
   # path: identity.type
@@ -151,6 +118,9 @@ EOT
   #   source:    [from commonids.ValidateUserAssignedIdentityID] !ok
   # path: primary_user_assigned_identity_id
   #   source:    [from commonids.ValidateUserAssignedIdentityID] err != nil
+  # path: minimum_tls_version
+  #   condition: contains(["1.2"], value)
+  #   message:   must be one of: 1.2
   # path: tags
   #   condition: length(value) <= 50
   #   message:   [from tags.Validate: invalid when len(value) > 50]
