@@ -22,7 +22,7 @@ output "mssql_servers_administrator_login_password_wo_version" {
 }
 output "mssql_servers_azuread_administrator" {
   description = "Map of azuread_administrator values across all mssql_servers, keyed the same as var.mssql_servers"
-  value       = { for k, v in azurerm_mssql_server.mssql_servers : k => v.azuread_administrator if v.azuread_administrator != null && length(v.azuread_administrator) > 0 }
+  value       = { for k, v in azurerm_mssql_server.mssql_servers : k => one(v.azuread_administrator) if v.azuread_administrator != null && length(v.azuread_administrator) > 0 }
 }
 output "mssql_servers_connection_policy" {
   description = "Map of connection_policy values across all mssql_servers, keyed the same as var.mssql_servers"
@@ -38,7 +38,7 @@ output "mssql_servers_fully_qualified_domain_name" {
 }
 output "mssql_servers_identity" {
   description = "Map of identity values across all mssql_servers, keyed the same as var.mssql_servers"
-  value       = { for k, v in azurerm_mssql_server.mssql_servers : k => v.identity if v.identity != null && length(v.identity) > 0 }
+  value       = { for k, v in azurerm_mssql_server.mssql_servers : k => one(v.identity) if v.identity != null && length(v.identity) > 0 }
 }
 output "mssql_servers_location" {
   description = "Map of location values across all mssql_servers, keyed the same as var.mssql_servers"
